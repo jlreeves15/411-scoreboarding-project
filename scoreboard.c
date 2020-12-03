@@ -13,16 +13,45 @@ typedef struct scoreboard
 
 } scoreboard_t;
 
+static int vals_in_mem[] = {45,12,0,0,10,135,254,127,18,4,55,8,2,98,13,5,233,158, 167};
+
+float load_register(float dest, int offset, int address)
+{
+    int counter = 0;
+    if( offset + address <= 18)
+    {
+	dest = vals_in_mem[offset + address];
+    }
+    else if(offset + address > 18)
+    {
+	counter = offset+address -18;
+	dest = vals_in_mem[counter - 1];
+    }
+    return dest;
+
+}
+
+void store_register(float dest, int offset, int address)
+{
+
+}
 
 int main(int argc, char *argv[])
 {
+
     FILE *fp;
+    char buf[100];
     int bufsize = BUFSIZ;
     int index = 0;
-    char buf[100];
     char* token;
     struct scoreboard my_scoreboard[bufsize];
     int counter = 0;
+    //int vals_in_mem[] = {45,12,0,0,10,135,254,127,18,4,55,8,2,98,13,5,233,158,167};
+    int other_vals[] = {45,12,0,0,10,135,254,127,18,4,55,8,2,98,13,5,233,158,167};
+    int int_reg[32] = {0};
+    float float_reg[32] = {0};
+
+
     fp = fopen("instructions.txt", "r");
     if(!fp)
     {
@@ -43,25 +72,21 @@ int main(int argc, char *argv[])
 		  case 0:
 			strcpy(my_scoreboard[counter].instruction, token);
 			index++;
-			printf("I: %s\n", my_scoreboard[counter].instruction);
 			token = strtok(NULL, " ");
 			break;
 		  case 1:
 			strcpy(my_scoreboard[counter].dest_reg, token);
                         index++;
-			printf("D: %s\n", my_scoreboard[counter].dest_reg);
                         token = strtok(NULL, " ");
 			break;
 		  case 2:
 			strcpy(my_scoreboard[counter].source_reg1, token);
                         index++;
-			printf("S1: %s\n", my_scoreboard[counter].source_reg1);
                         token = strtok(NULL, " ");
                         break;
 		  case 3:
 			strcpy(my_scoreboard[counter].source_reg2, token);
                         index++;
-			printf("S2: %s\n", my_scoreboard[counter].source_reg2);
                         token = strtok(NULL, " ");
                         break;
 		  default:
@@ -73,9 +98,20 @@ int main(int argc, char *argv[])
 		  index++;
 		}
 		counter++;
-		printf("How many instructions: %d\n", counter);
         }
     }
         fclose(fp);
+	int i = 0;
+	for(i = 0; i < counter; i++)
+	{
+		printf("I: %s\n", my_scoreboard[i].instruction);
+		printf("D: %s\n", my_scoreboard[i].dest_reg);
+		printf("S1: %s\n", my_scoreboard[i].source_reg1);
+		printf("S2: %s\n", my_scoreboard[i].source_reg2);
+	}
+
+
+	float_reg[0] = load_register(float_reg[0], 10, 13);
+	printf("%f\n", float_reg[0]);
         return 0;
 }
