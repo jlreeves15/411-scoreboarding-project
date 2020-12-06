@@ -432,6 +432,7 @@ int scoreboarding(scoreboard_t instructions[], char used_reg[bufsize][5],
 	    {
 		if(strcmp(instructions[cur_inst].dest_reg, used_reg[i]) == 0)
 		{
+		    printf("No on cmp\n");
 		    return 1;
 		}
 		i++;
@@ -445,13 +446,17 @@ int scoreboarding(scoreboard_t instructions[], char used_reg[bufsize][5],
 		    break;
                 }
                 i++;
-            {
-	    available = scoreboarding(instructions, used_reg, counter - 1,
+            }
+	    if(counter - 1 != -1)
+	    {
+		available = scoreboarding(instructions, used_reg, counter - 1,
 			score, cur_inst + 1);
+	    }
 	    instructions[cur_inst].read = ++score;
 	    instructions[cur_inst].execute = ++score;
 	    instructions[cur_inst].write = ++score;
 	    int_calc = 0;
+	    score++;
 
 	    for( i = 0; i < bufsize; i++)
             {
@@ -464,12 +469,18 @@ int scoreboarding(scoreboard_t instructions[], char used_reg[bufsize][5],
                 }
 		i++;
             }
-	    if(available == 1)
+	    if(available == 1 && counter - 1 != -1)
 	    {
 		printf("Yes\n");
 		scoreboarding(instructions, used_reg, counter - 1,
 			score, cur_inst + 1);
 	    }
+	}
+	else if((strcmp(instructions[cur_inst].inst, "ADD") == 0 ||
+                	strcmp(instructions[cur_inst].inst, "SUB") == 0)
+                	&& int_calc == 0))
+	{
+
 	}
 	else { return 1; }
     }
@@ -579,5 +590,4 @@ int main()
 
 
 	return 0;
-}
 }
