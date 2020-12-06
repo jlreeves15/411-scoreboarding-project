@@ -440,15 +440,15 @@ int calculate( scoreboard_t instructions)
 int scoreboarding(scoreboard_t instructions[], char used_reg[bufsize][3],
 	int counter, int score, int cur_inst)
 {
+    printf("Counter: %d\n",counter);
     int i;
     int available = 0;
-    while(counter != -1)
+    while(counter > 0)
     {
 	if ((strcmp(instructions[cur_inst].inst, "L.D") == 0 ||
 		strcmp(instructions[cur_inst].inst, "S.D") == 0)
 		&& int_calc == 0)
 	{
-	    printf("Counter: %d\n",counter);
 	    int_calc = 1;
 
 	    if(instructions[cur_inst].issue == 0)
@@ -473,16 +473,20 @@ int scoreboarding(scoreboard_t instructions[], char used_reg[bufsize][3],
                 }
                 i++;
             }
-	    if(counter - 1 != -1)
+	    if(counter - 1 > 0)
 	    {
+		printf("Before loop\n");
 		available = scoreboarding(instructions, used_reg, counter - 1,
 			score, cur_inst + 1);
 	    }
+
 	    instructions[cur_inst].read = ++score;
 	    instructions[cur_inst].execute = ++score;
 	    instructions[cur_inst].write = ++score;
 	    int_calc = 0;
 	    score++;
+	    counter--;
+	    cur_inst++;
 
 	    for( i = 0; i < bufsize; i++)
             {
@@ -492,10 +496,12 @@ int scoreboarding(scoreboard_t instructions[], char used_reg[bufsize][3],
 		    used_reg[i][1] = '\0';
 		    used_reg[i][2] = '\0';
 		    printf("No: %s\n",used_reg[i]);
+		    break;
                 }
 		i++;
             }
-	    if(available == 1 && counter - 1 != -1)
+
+	    if(available == 1 && counter - 1 > 0)
 	    {
 		printf("Yes\n");
 		scoreboarding(instructions, used_reg, counter - 1,
@@ -511,7 +517,7 @@ int scoreboarding(scoreboard_t instructions[], char used_reg[bufsize][3],
 	    int_calc = 1;
             instructions[cur_inst].issue = score;
 
-	    if(counter - 1 != -1)
+	    if(counter - 1 > 0)
 	    {
 		available = scoreboarding(instructions, used_reg, counter - 1,
 			score, cur_inst + 1);
@@ -521,8 +527,9 @@ int scoreboarding(scoreboard_t instructions[], char used_reg[bufsize][3],
 	    instructions[cur_inst].write = ++score;
 	    int_calc = 0;
 	    score++;
+	    counter--;
 
-	    if(available == 1 && counter - 1 != -1)
+	    if(available == 1 && counter - 1 > 0)
 	    {
 		printf("Yes\n");
 		scoreboarding(instructions, used_reg, counter - 1,
@@ -532,7 +539,7 @@ int scoreboarding(scoreboard_t instructions[], char used_reg[bufsize][3],
 	else if(strcmp(instructions[cur_inst].inst, "ADD.D") == 0
                         && int_calc == 0)
 	{
-	    printf("Counter: %d\n",counter);
+	    printf("Counter on Add.d: %d\n",counter);
 	    fp_adder = 1;
 
 	    if(instructions[cur_inst].issue == 0)
@@ -543,16 +550,19 @@ int scoreboarding(scoreboard_t instructions[], char used_reg[bufsize][3],
 		if(strcmp(instructions[cur_inst].dest_reg, used_reg[i]) == 0)
 		{
 		    printf("No on cmp\n");
+		    fp_adder = 0;
 		    return 1;
 		}
 		if(strcmp(instructions[cur_inst].source_reg1, used_reg[i]) == 0)
                 {
                     printf("No on cmp\n");
+		    fp_adder = 0;
                     return 1;
                 }
                 if(strcmp(instructions[cur_inst].source_reg2, used_reg[i]) == 0)
                 {
                     printf("No on cmp\n");
+		    fp_adder = 0;
                     return 1;
                 }
 		i++;
@@ -573,10 +583,12 @@ int scoreboarding(scoreboard_t instructions[], char used_reg[bufsize][3],
 		    printf("On: %s\n",used_reg[i]);
                 }
                 i++;
+		count++;
             }
 
-	    if(counter - 1 != -1)
+	    if(counter - 1 > 0)
 	    {
+		printf("Before loop!\n");
 		available = scoreboarding(instructions, used_reg, counter - 1,
 			score, cur_inst + 1);
 	    }
@@ -587,6 +599,7 @@ int scoreboarding(scoreboard_t instructions[], char used_reg[bufsize][3],
 	    instructions[cur_inst].write = ++score;
 	    fp_adder = 0;
 	    score++;
+	    counter--;
 
 	    for( i = 0; i < bufsize; i++)
             {
@@ -616,16 +629,19 @@ int scoreboarding(scoreboard_t instructions[], char used_reg[bufsize][3],
 		i++;
             }
 
-	    if(available == 1 && counter - 1 != -1)
+	    if(available == 1 && counter - 1 > 0)
 	    {
 	    	printf("Yes\n");
 		scoreboarding(instructions, used_reg, counter - 1,
 			score, cur_inst + 1);
 	    }
 	}
-	else { return 1; }
+	else {
+	    printf("Invalid\n");
+	    return 1; }
     }
     return 0;
+    printf("Goes here\n");
 }
 
 int main()
