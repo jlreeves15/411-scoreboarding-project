@@ -15,6 +15,6 @@ Instruction in Linux:
 1) Download the folder
 2) Unzip the folder to the default download location
 3) Go to your terminal
-4) While in the terminal, navigate the file unzipped folder named "411-scoreboarding-project-main" (it should be in the Downloads) and go inside that folder
+4) While in the terminal, navigate the file unzipped folder named "Trinidad_Cris_Reeves_Jamar_project" (it should be in the Downloads) and go inside that folder
 5) In the promp, write "make" (without the quotes) to build the program.
 6) Then, write "./scoreboard" (without the quotes) to run the program.
