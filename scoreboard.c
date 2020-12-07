@@ -25,8 +25,8 @@ static int vals_in_mem[] = {45,12,0,0,10,135,254,127,18,4,55,8,2,98,13,5,233,158
 static int int_reg[32] = {0};
 static float float_reg[32] = {0};
 static int fp_adder = 0;
-//static int fp_mul = 0;
-//static int fp_div = 0;
+static int fp_mul = 0;
+static int fp_div = 0;
 static int int_calc = 0;
 
 void load_register(int dest, int offset, int address, int reg)
@@ -559,14 +559,15 @@ int scoreboarding(scoreboard_t instructions[], int used_reg[],
 			score, cur_inst + 1);
 	    }
 	}
-	else if(strcmp(instructions[cur_inst].inst, "ADD.D") == 0
+	else if((strcmp(instructions[cur_inst].inst, "ADD.D") == 0 ||
+			strcmp(instructions[cur_inst].inst, "SUB.D") == 0)
                         && fp_adder == 0)
 	{
 	    printf("Counter on Add.d: %d\n",counter);
 	    fp_adder = 1;
 
 	    if(instructions[cur_inst].issue == 0)
-            	instructions[cur_inst].issue = score;
+            	instructions[cur_inst].issue = ++score;
 
 	    for( i = 0; i < 100; i++)
 	    {
@@ -621,6 +622,189 @@ int scoreboarding(scoreboard_t instructions[], int used_reg[],
 	    instructions[cur_inst].execute = score;
 	    instructions[cur_inst].write = ++score;
 	    fp_adder = 0;
+	    score++;
+
+	    for( i = 0; i < 100; i++)
+            {
+                if(instructions[cur_inst].dest_num == used_reg[i])
+                {
+                    used_reg[i] = -1;
+		    printf("No: %d\n",used_reg[i]);
+                }
+		else if(instructions[cur_inst].source_num1 == used_reg[i])
+                {
+                    used_reg[i] = -1;
+                    printf("No: %d\n",used_reg[i]);
+                }
+		else if(instructions[cur_inst].source_num2 == used_reg[i])
+                {
+                    used_reg[i] = -1;
+                    printf("No: %d\n",used_reg[i]);
+                }
+		i++;
+            }
+
+	    if(available == 1 && counter - 1 > 0)
+	    {
+	    	printf("Yes\n");
+		scoreboarding(instructions, used_reg, counter - 1,
+			score, cur_inst + 1);
+	    }
+	}
+	else if(strcmp(instructions[cur_inst].inst, "MUL.D") == 0
+                        && fp_mul == 0)
+	{
+	    printf("Counter on Mul.d: %d\n",counter);
+	    fp_mul = 1;
+
+	    if(instructions[cur_inst].issue == 0)
+            	instructions[cur_inst].issue = ++score;
+
+	    for( i = 0; i < 100; i++)
+	    {
+		if(instructions[cur_inst].dest_num == used_reg[i])
+		{
+		    printf("No on dest_reg %d: %d %d\n", i, instructions[cur_inst].dest_num, used_reg[i]);
+		    fp_mul = 0;
+		    return 1;
+		}
+		if(instructions[cur_inst].source_num1 == used_reg[i])
+                {
+                    printf("No on sc1: %d\n", used_reg[i]);
+		    fp_mul = 0;
+                    return 1;
+                }
+                if(instructions[cur_inst].source_num2 == used_reg[i])
+                {
+                    printf("No on sc2: %d %d\n",instructions[cur_inst].source_num2, used_reg[i]);
+		    fp_mul = 0;
+                    return 1;
+                }
+		i++;
+	    }
+
+	    int count = 0;
+	    for( i = 0; i < 100; i++)
+            {
+                if(used_reg[i] == -1)
+                {
+                    if( count == 0)
+			used_reg[i] = instructions[cur_inst].dest_num;
+		    else if( count == 1)
+                        used_reg[i] = instructions[cur_inst].source_num1;
+		    else if( count == 2)
+                        used_reg[i] = instructions[cur_inst].source_num2;
+		    else
+			break;
+		    printf("On: %d\n",used_reg[i]);
+                }
+                i++;
+		count++;
+            }
+
+	    if(counter - 1 > 0)
+	    {
+		printf("Before loop!\n");
+		available = scoreboarding(instructions, used_reg, counter - 1,
+			score, cur_inst + 1);
+	    }
+
+	    instructions[cur_inst].read = score;
+	    score+=10;
+	    instructions[cur_inst].execute = score;
+	    instructions[cur_inst].write = ++score;
+	    fp_mul = 0;
+	    score++;
+
+	    for( i = 0; i < 100; i++)
+            {
+                if(instructions[cur_inst].dest_num == used_reg[i])
+                {
+                    used_reg[i] = -1;
+		    printf("No: %d\n",used_reg[i]);
+                }
+		else if(instructions[cur_inst].source_num1 == used_reg[i])
+                {
+                    used_reg[i] = -1;
+                    printf("No: %d\n",used_reg[i]);
+                }
+		else if(instructions[cur_inst].source_num2 == used_reg[i])
+                {
+                    used_reg[i] = -1;
+                    printf("No: %d\n",used_reg[i]);
+                }
+		i++;
+            }
+
+	    if(available == 1 && counter - 1 > 0)
+	    {
+	    	printf("Yes\n");
+		scoreboarding(instructions, used_reg, counter - 1,
+			score, cur_inst + 1);
+	    }
+	}
+	else if(strcmp(instructions[cur_inst].inst, "DIV.D") == 0
+                        && fp_div == 0)
+	{
+	    printf("Counter on div.d: %d\n",counter);
+	    fp_div = 1;
+
+	    if(instructions[cur_inst].issue == 0)
+            	instructions[cur_inst].issue = ++score;
+
+	    for( i = 0; i < 100; i++)
+	    {
+		if(instructions[cur_inst].dest_num == used_reg[i])
+		{
+		    printf("No on dest_reg %d: %d %d\n", i, instructions[cur_inst].dest_num, used_reg[i]);
+		    fp_div = 0;
+		    return 1;
+		}
+		if(instructions[cur_inst].source_num1 == used_reg[i])
+                {
+                    printf("No on sc1: %d\n", used_reg[i]);
+		    fp_div = 0;
+                    return 1;
+                }
+                if(instructions[cur_inst].source_num2 == used_reg[i])
+                {
+                    printf("No on sc2: %d %d\n",instructions[cur_inst].source_num2, used_reg[i]);
+		    fp_div = 0;
+                    return 1;
+                }
+		i++;
+	    }
+	    int count = 0;
+	    for( i = 0; i < 100; i++)
+            {
+                if(used_reg[i] == -1)
+                {
+                    if( count == 0)
+			used_reg[i] = instructions[cur_inst].dest_num;
+		    else if( count == 1)
+                        used_reg[i] = instructions[cur_inst].source_num1;
+		    else if( count == 2)
+                        used_reg[i] = instructions[cur_inst].source_num2;
+		    else
+			break;
+		    printf("On: %d\n",used_reg[i]);
+                }
+                i++;
+		count++;
+            }
+
+	    if(counter - 1 > 0)
+	    {
+		printf("Before loop!\n");
+		available = scoreboarding(instructions, used_reg, counter - 1,
+			score, cur_inst + 1);
+	    }
+
+	    instructions[cur_inst].read = score;
+	    score+=40;
+	    instructions[cur_inst].execute = score;
+	    instructions[cur_inst].write = ++score;
+	    fp_div = 0;
 	    score++;
 
 	    for( i = 0; i < 100; i++)
